@@ -51,7 +51,7 @@ async function main(): Promise<void> {
   const argv = process.argv.slice(2);
   const useLlm = argv.includes('--llm');
   const goal = argv
-    .filter((a) => a !== '--llm')
+    .filter((a) => a !== '--llm' && a !== '--')
     .join(' ')
     .trim();
 

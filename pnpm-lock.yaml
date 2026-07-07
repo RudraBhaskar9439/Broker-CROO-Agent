@@ -77,12 +77,26 @@ importers:
       zod:
         specifier: ^3.24.1
         version: 3.25.76
+    devDependencies:
+      '@maestro/config':
+        specifier: workspace:*
+        version: link:../config
 
   packages/registry:
     dependencies:
       zod:
         specifier: ^3.24.1
         version: 3.25.76
+    devDependencies:
+      '@maestro/config':
+        specifier: workspace:*
+        version: link:../config
+      '@maestro/croo-client':
+        specifier: workspace:*
+        version: link:../croo-client
+      '@maestro/logger':
+        specifier: workspace:*
+        version: link:../logger
 
 packages:
 

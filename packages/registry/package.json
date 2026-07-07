@@ -22,5 +22,10 @@
   },
   "dependencies": {
     "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@maestro/config": "workspace:*",
+    "@maestro/croo-client": "workspace:*",
+    "@maestro/logger": "workspace:*"
   }
 }

@@ -9,6 +9,7 @@
  */
 import 'dotenv/config';
 import { safeLoadConfig } from '@maestro/config';
+import { createLogger } from '@maestro/logger';
 import { createAgentClient, probeConnection, getUsdcBalance, isUnauthorized } from '../src/index';
 
 function fail(message: string): void {
@@ -32,7 +33,10 @@ async function main(): Promise<void> {
   console.log(`API:  ${config.crooApiUrl}`);
   console.log(`WS:   ${config.crooWsUrl}`);
 
-  const client = createAgentClient(config);
+  // Quiet logger: the SDK logs the WS URL (which embeds the key) at info level.
+  const client = createAgentClient(config, {
+    logger: createLogger({ name: 'croo-client', level: 'warn' }),
+  });
 
   try {
     const probe = await probeConnection(client);

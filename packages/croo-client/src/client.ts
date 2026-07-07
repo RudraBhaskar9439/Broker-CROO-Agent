@@ -40,7 +40,8 @@ export interface ProbeResult {
  * leg fails — callers translate the error for the user.
  */
 export async function probeConnection(client: AgentClient): Promise<ProbeResult> {
-  const orders = await client.listOrders({ pageSize: 1 });
+  // listOrders requires a role; 'buyer' reflects Maestro's consumer side.
+  const orders = await client.listOrders({ role: 'buyer', pageSize: 1 });
   const stream = await client.connectWebSocket();
   stream.close();
   return { authOk: true, wsOk: true, orderCount: orders.length };

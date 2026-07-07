@@ -79,7 +79,11 @@ async function main(): Promise<void> {
   console.log('\n⏳ negotiating → paying → awaiting delivery …\n');
 
   try {
-    const result = await hire(client, { serviceId, requirements });
+    const result = await hire(
+      client,
+      { serviceId, requirements },
+      { acceptTimeoutMs: 120_000, deliverTimeoutMs: 600_000 },
+    );
     const price = formatUnits(result.price || '0', USDC_DECIMALS);
 
     console.log('✅ Hire complete');

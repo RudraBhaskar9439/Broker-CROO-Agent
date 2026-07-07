@@ -11,6 +11,9 @@ export const configSchema = z.object({
   crooApiUrl: z.string().url(),
   crooWsUrl: z.string().url(),
   crooSdkKey: z.string().min(1),
+  /** SDK key for Maestro's in-house worker/provider agent (Phase 6). Optional:
+   * only the provider process needs it. */
+  workerSdkKey: z.string().min(1).optional(),
   /** Maestro's AA wallet address on Base (shown in the CROO dashboard). */
   walletAddress: z
     .string()
@@ -33,6 +36,7 @@ function fromEnv(env: NodeJS.ProcessEnv): Record<string, unknown> {
     crooApiUrl: env.CROO_API_URL,
     crooWsUrl: env.CROO_WS_URL,
     crooSdkKey: env.CROO_SDK_KEY,
+    workerSdkKey: env.WORKER_SDK_KEY,
     walletAddress: env.MAESTRO_WALLET_ADDRESS,
     baseRpcUrl: env.BASE_RPC_URL,
     llmApiKey: env.LLM_API_KEY,

@@ -2,17 +2,17 @@
 
 Each phase ends at a **proof gate**: a runnable command that demonstrates the phase works.
 
-| #   | Phase                                              | Proof gate                                        | Status  |
-| --- | -------------------------------------------------- | ------------------------------------------------- | ------- |
-| 0   | Foundation (monorepo, tooling, `config`, `logger`) | `pnpm check` all green                            | ✅      |
-| 1   | `croo-client` (typed SDK wrapper, WS, events)      | `pnpm croo:ping` prints wallet + USDC balance     | ✅      |
-| 2   | First real A2A hire                                | `pnpm croo:hire` returns result + on-chain txHash | 🟡 code |
-| 3   | `registry` (curated agent roster)                  | `pnpm registry:verify` validates roster           | ✅      |
-| 4   | `planner` (goal → plan; rule + Grok/LLM)           | `pnpm plan "<goal>"` valid plan                   | ✅      |
-| 5   | `orchestrator` + `receipts`                        | `pnpm run:goal "<goal>"` answer + receipt trail   | ✅      |
-| 6   | Maestro provider + in-house specialists            | external requester hires Maestro                  | ⬜      |
-| 7   | Demo surface (CLI / dashboard)                     | recorded ≤5-min run                               | ⬜      |
-| 8   | Package & submit                                   | submission checklist green                        | ⬜      |
+| #   | Phase                                              | Proof gate                                         | Status  |
+| --- | -------------------------------------------------- | -------------------------------------------------- | ------- |
+| 0   | Foundation (monorepo, tooling, `config`, `logger`) | `pnpm check` all green                             | ✅      |
+| 1   | `croo-client` (typed SDK wrapper, WS, events)      | `pnpm croo:ping` prints wallet + USDC balance      | ✅      |
+| 2   | First real A2A hire                                | `pnpm croo:hire` returns result + on-chain txHash  | 🟡 code |
+| 3   | `registry` (curated agent roster)                  | `pnpm registry:verify` validates roster            | ✅      |
+| 4   | `planner` (goal → plan; rule + Grok/LLM)           | `pnpm plan "<goal>"` valid plan                    | ✅      |
+| 5   | `orchestrator` + `receipts`                        | `pnpm run:goal "<goal>"` answer + receipt trail    | ✅      |
+| 6   | Provider (in-house worker Maestro hires)           | `pnpm worker` accepts + delivers; Maestro hires it | 🟡 code |
+| 7   | Demo surface (CLI / dashboard)                     | recorded ≤5-min run                                | ⬜      |
+| 8   | Package & submit                                   | submission checklist green                         | ⬜      |
 
 ## Proof log
 
@@ -96,3 +96,19 @@ Each phase ends at a **proof gate**: a runnable command that demonstrates the ph
 - Unit tests: graph aggregation/format; orchestration order-graph, context
   passing, concurrency, failure resilience, events, cycle detection (8 tests).
 - Live (dry-run): Grok plan → DAG orchestrated → order graph + composed result.
+
+### Phase 6
+
+- **Finding:** third-party store agents are unreliable for programmatic A2A
+  hiring — tested Polymarket (never accepts SDK negotiations), croocred
+  (rejects: provider out of gas), skeptis (rejects). So Maestro hires **our own
+  worker agents** instead: reliable, recycles USDC, still proves A2A on-chain.
+- Also learned: the store has a **public API** (`/backend/v1/public/agents/{id}`)
+  exposing serviceIds — enables real discovery (no login needed).
+- Package: `@maestro/provider` — `runProvider()` auto-accepts negotiations and,
+  on payment, delivers a result via a `ProviderHandler`. `llmHandler` (Groq)
+  makes the worker genuinely useful; `echoHandler` for offline/tests.
+- config: `WORKER_SDK_KEY`. Command: `pnpm worker` runs the worker agent.
+- Unit tests: auto-accept + deliver-on-payment (fake client/stream).
+- 🟡 Code + tests green. Live proof pending: register a worker agent on the
+  dashboard, fund it, run `pnpm worker`, then `pnpm run:goal --live`.

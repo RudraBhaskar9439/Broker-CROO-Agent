@@ -28,10 +28,11 @@ export const defaultRoster: AgentEntryInput[] = [
     category: 'data-analytics',
     description: 'Turns a Polymarket proxy/smart wallet address into structured intelligence.',
     capabilities: ['polymarket', 'wallet-analysis', 'onchain-intel', 'prediction-markets'],
-    inputHint: 'A 0x Polymarket proxy/smart wallet address.',
+    inputHint: 'JSON: { "wallet_address": "0x… Polymarket proxy/smart wallet" }',
+    serviceId: '022c38ad-0be9-4ee1-8f76-d645cb182010',
     priceUsdc: 0.1,
     source: 'third-party',
-    enabled: false,
+    enabled: true,
   },
   {
     id: 'hyperliquid-vault',

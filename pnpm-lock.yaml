@@ -104,6 +104,18 @@ importers:
         specifier: workspace:*
         version: link:../config
 
+  packages/provider:
+    dependencies:
+      '@maestro/croo-client':
+        specifier: workspace:*
+        version: link:../croo-client
+      '@maestro/logger':
+        specifier: workspace:*
+        version: link:../logger
+      '@maestro/planner':
+        specifier: workspace:*
+        version: link:../planner
+
   packages/receipts: {}
 
   packages/registry:

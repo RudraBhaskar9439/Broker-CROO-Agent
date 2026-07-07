@@ -11,11 +11,17 @@ interface ChatCompletion {
   choices?: { message?: { content?: string } }[];
 }
 
+export interface CreateChatOptions {
+  /** Request a JSON object response (for the planner). Off for free-text. */
+  json?: boolean;
+}
+
 /**
- * Create a chat function against any OpenAI-compatible endpoint (xAI/Grok by
- * default). Requests JSON output at temperature 0 for reproducible plans.
+ * Create a chat function against any OpenAI-compatible endpoint (xAI/Grok/Groq
+ * by default). Temperature 0 for reproducibility; JSON mode is opt-in.
  */
-export function createChat(config: LlmConfig): ChatFn {
+export function createChat(config: LlmConfig, options: CreateChatOptions = {}): ChatFn {
+  const json = options.json ?? true;
   return async (system, user) => {
     const res = await fetch(`${config.baseUrl}/chat/completions`, {
       method: 'POST',
@@ -26,7 +32,7 @@ export function createChat(config: LlmConfig): ChatFn {
       body: JSON.stringify({
         model: config.model,
         temperature: 0,
-        response_format: { type: 'json_object' },
+        ...(json ? { response_format: { type: 'json_object' } } : {}),
         messages: [
           { role: 'system', content: system },
           { role: 'user', content: user },

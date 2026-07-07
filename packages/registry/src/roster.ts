@@ -102,12 +102,13 @@ export const defaultRoster: AgentEntryInput[] = [
     id: 'agentstools-onchain',
     name: 'agentstools · Onchain Code',
     category: 'defi-trading',
-    description: 'On-chain code analysis for a contract address.',
-    capabilities: ['onchain', 'code', 'contract', 'analysis', 'audit'],
-    inputHint: 'A contract address to analyse on-chain.',
+    description: 'On-chain code analysis (is_contract, code size/hash) for a contract address.',
+    capabilities: ['onchain', 'code', 'contract', 'bytecode', 'analysis'],
+    // Third-party schema agent: requires JSON with an `address` field.
+    inputHint: 'JSON object exactly: {"address": "0x… the contract address to analyse"}',
     serviceId: '76c36947-f2c6-4b5f-afaa-31eb773b6abe',
     priceUsdc: 0.05,
     source: 'third-party',
-    enabled: false,
+    enabled: true,
   },
 ];

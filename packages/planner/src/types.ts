@@ -37,7 +37,12 @@ export const llmPlanSchema = z.object({
     .array(
       z.object({
         agentId: z.string().min(1),
-        requirements: z.string().min(1),
+        // The LLM may return requirements as plain text OR a JSON object (for
+        // schema agents); normalise objects to a JSON string.
+        requirements: z.preprocess(
+          (v) => (typeof v === 'string' ? v : JSON.stringify(v)),
+          z.string().min(1),
+        ),
         dependsOn: z.array(z.coerce.number().int().positive()).default([]),
         reason: z.string().default(''),
       }),

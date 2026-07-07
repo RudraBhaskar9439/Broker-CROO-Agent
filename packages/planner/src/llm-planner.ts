@@ -7,7 +7,13 @@ callable agents. Break the goal into a sequence of focused steps, each hiring on
 specific sub-task. You MAY hire the same agent multiple times for different sub-tasks. Prefer
 2-4 steps for a non-trivial goal so later steps can build on earlier findings. Express ordering
 with "dependsOn": a list of step numbers (1-based, referring to EARLIER steps in your list) whose
-output this step needs. Only use agentIds from the catalogue. Respond with strict JSON:
+output this step needs.
+
+CRITICAL: set each step's "requirements" to EXACTLY the format that agent expects — shown after
+"input:" in the catalogue. If the input format is a JSON object (e.g. {"address": "..."}), output
+that exact JSON with the real value filled in. Otherwise use plain descriptive text.
+
+Only use agentIds from the catalogue. Respond with strict JSON:
 {"steps":[{"agentId","requirements","dependsOn":[<step numbers>],"reason"}]}`;
 
 function catalogue(agents: AgentEntry[]): string {

@@ -1,111 +1,154 @@
-# Maestro
+<div align="center">
 
-**The orchestration layer for the CROO agent economy.**
+# 🎼 Maestro
 
-Maestro takes a single goal, decomposes it, then **discovers, hires, pays, and composes multiple CROO agents** through the CROO Agent Protocol (CAP) — settling every sub-task on-chain in USDC on Base — and returns one finished result plus a verifiable receipt trail of every agent it employed.
+### The orchestration layer for the CROO agent economy
 
-> One question in → a coordinated team of paid autonomous agents → one answer out, with an on-chain paper trail.
+**Give Maestro a goal — it hires, pays, and composes a team of specialist agents to answer it, settling every sub-task on-chain in USDC on Base.**
 
-Maestro is both a **hirer** (it hires other agents, A2A) and **hireable** (humans and agents can hire Maestro, H2A) — a full node in the agent economy, not a UI on top of it.
+`@croo-network/sdk` · Base mainnet (8453) · TypeScript · MIT
 
-## Why it exists
+</div>
 
-The CROO Agent Store has hundreds of specialist agents, but almost all of them are standalone workers called one at a time. Maestro is the **conductor**: it turns a goal into a plan, hires the right agents in the right order, feeds each one's output into the next, and delivers a composed result. This is the thing a normal API marketplace can't do — autonomous agents **discovering, hiring, and paying each other on-chain**.
+---
 
-## Live proof
+Almost every agent on the CROO Agent Store is a standalone worker you call one at a time. **Maestro is the conductor.** It takes one goal, breaks it into a dependency graph of sub-tasks, hires the right agent for each — _including other people's agents_ — pays them over the CROO Agent Protocol (CAP), chains each result into the next, and returns one composed answer with a verifiable on-chain receipt trail.
 
-Maestro has settled **12+ real CAP orders on Base mainnet**, each a genuine A2A hire with on-chain payment, delivery, and clearing. Example first order:
+Maestro is **both hireable and a hirer** — a full node in the agent economy, not a UI on top of it:
 
-| Stage   | Transaction                                                                                                        |
-| ------- | ------------------------------------------------------------------------------------------------------------------ |
-| Pay     | [`0xaa254b76…21ea9`](https://basescan.org/tx/0xaa254b7639c887035eea28cbb82b0fbe09488962961dc590cad3d79792b21ea9)   |
-| Deliver | [`0x424e87e0…166432`](https://basescan.org/tx/0x424e87e07ddebe7d321a6523fd84c72c1e66071445655487b910019609166432)  |
-| Clear   | [`0x735a1b2c…a5c6056`](https://basescan.org/tx/0x735a1b2cc85bc795c77588b22297c9c9827860b6cfd1bf1ad4cce9683a5c6056) |
+- **Hire it (H2A):** anyone can hire Maestro's `orchestrate` service from the CROO website like any other agent.
+- **It hires others (A2A):** to fulfil a hire, Maestro autonomously hires and pays sub-agents on-chain.
 
-A single goal typically produces a 3–4 step dependency graph:
+## Highlights
+
+- 🤝 **Multi-owner orchestration** — Maestro hires _independent, different-owner_ agents (verified live with `agentstools`) alongside its own, formatting each agent's input to its exact schema.
+- ⛓️ **Real on-chain settlement** — full CAP lifecycle (`negotiate → pay → deliver → clear`) in USDC on Base, with safe payment retry.
+- 🧠 **LLM planning** — decomposes a goal into a dependency DAG (via an OpenAI-compatible model; deterministic rule-based fallback included).
+- 🔎 **Live discovery** — pulls the hireable roster straight from the store's public API, no keys or transactions.
+- 🧩 **Clean monorepo** — 8 focused packages, 44 tests, every capability its own buildable module.
+
+## See it live
+
+Maestro is **online and hireable** on the CROO store. As of writing:
+
+| Agent                     | Role                         | Completed                         | Completion rate |
+| ------------------------- | ---------------------------- | --------------------------------- | --------------- |
+| **Maestro** `0xEc51…D319` | orchestrator (hireable)      | 3 as provider · **27 hires made** | 100%            |
+| **Scout** `0xC232…46bD`   | in-house analyst (sub-agent) | 22                                | 100%            |
+
+**A real multi-owner order graph** — one goal, two independent agents, both settled on-chain:
 
 ```
-✔ s1        scout   0.01 USDC
-✔ s2 ← s1   scout   0.01 USDC
-✔ s3 ← s1,s2 scout  0.01 USDC
-✔ s4 ← s1,s2,s3 scout 0.01 USDC
-4/4 orders settled on-chain → composed result
+Goal: "Analyse the on-chain code of contract 0x8335…2913 and explain it."
+
+✔ s1        agentstools · Onchain Code   0.05 USDC   ← independent owner
+✔ s2 ← s1   scout                        0.01 USDC   ← in-house
+2/2 orders settled on-chain → one composed answer
 ```
+
+Delivered result:
+
+> **## agentstools-onchain** → `{"is_contract": true, "code_size": 1852, "code_hash": "0xa670…", "chain": "eip155:8453"}`
+> **## scout** → _"The contract is confirmed to be a smart contract of 1852 bytes on eip155:8453; the code hash verifies integrity; next steps: retrieve the ABI, run static analysis…"_
+
+On-chain proof (Base): [first pay tx](https://basescan.org/tx/0xaa254b7639c887035eea28cbb82b0fbe09488962961dc590cad3d79792b21ea9) ·
+[agentstools hire](https://basescan.org/tx/0x4f7a239b2746279c8982897a469fd52a5e78099a5d06677af313cff884f2ba9a) ·
+[scout hire](https://basescan.org/tx/0xea1e667537263092e00a7d6afe4152d8bb658eaaaef1ba2770efa6514274e75b)
+
+## How it works
+
+```
+                          ┌───────────────────────────────┐
+    human / agent  ─────► │  Maestro  (provider + planner)  │
+         goal             └───────────────┬─────────────────┘
+                                          │  1. plan → dependency DAG
+                          ┌───────────────┼───────────────────┐
+                          ▼               ▼                   ▼
+                   agentstools         Scout             (any agent)
+                 (someone else's)   (in-house)          2. negotiate
+                          │               │                   3. pay (USDC escrow, Base)
+                          │               │                   4. deliver + clear
+                          └───────────────┼───────────────────┘
+                                          ▼
+                       5. compose outputs → one answer + on-chain receipt trail
+```
+
+1. **Plan** — an LLM decomposes the goal into ordered steps with dependencies.
+2. **Hire** — for each step, Maestro negotiates a CAP order and locks USDC into on-chain escrow, formatting the input to that agent's schema.
+3. **Chain** — each agent's output feeds the steps that depend on it.
+4. **Settle** — delivery is verified and escrow clears on-chain.
+5. **Compose** — successful outputs are assembled into one result with a full order graph.
 
 ## Architecture
 
-```
-                         ┌──────────────────────────────┐
-   human / agent  ─────► │  Maestro (provider + planner) │
-        goal             └──────────────┬───────────────┘
-                                        │  plan (DAG)
-                    ┌───────────────────┼───────────────────┐
-                    ▼                   ▼                   ▼
-              CROO agent A        CROO agent B        CROO agent C
-           (negotiate→pay→deliver, USDC settled on Base via CAP)
-                    └───────────────────┼───────────────────┘
-                                        ▼
-                             composed result + receipt trail
-```
-
-## Packages
+Every capability is an independent, buildable package (ESM + CJS + types via `tsup`).
 
 | Package                 | Responsibility                                                     |
 | ----------------------- | ------------------------------------------------------------------ |
 | `@maestro/config`       | Environment loading & validation (zod)                             |
 | `@maestro/logger`       | Structured logging (pino)                                          |
 | `@maestro/croo-client`  | Typed boundary over `@croo-network/sdk`: `hire()`, events, balance |
-| `@maestro/registry`     | Curated, validated roster of hireable agents                       |
-| `@maestro/planner`      | Goal → plan (deterministic `RulePlanner` + LLM `LlmPlanner`)       |
-| `@maestro/orchestrator` | Executes the plan as a DAG, composes outputs                       |
-| `@maestro/receipts`     | Records the on-chain order graph (Maestro's proof of work)         |
-| `@maestro/provider`     | Runs an agent that auto-accepts and delivers (Scout / Maestro)     |
+| `@maestro/registry`     | Curated + **live-discovered** roster of hireable agents            |
+| `@maestro/planner`      | Goal → plan DAG (`RulePlanner` + LLM `LlmPlanner`)                 |
+| `@maestro/orchestrator` | Executes the plan, composes outputs, records the graph             |
+| `@maestro/receipts`     | The on-chain order graph — Maestro's proof of work                 |
+| `@maestro/provider`     | Runs an agent that auto-accepts & delivers (Scout, Maestro)        |
 
-## CAP / SDK integration notes
+## Quickstart
 
-Built on `@croo-network/sdk@0.2.1` (Base mainnet, chain 8453). Key methods used:
-
-- **Consumer (Maestro hires):** `negotiateOrder` → poll to `created` → `payOrder` → `getDelivery`.
-- **Provider (Scout / Maestro deliver):** `connectWebSocket` → `acceptNegotiation` → `deliverOrder`.
-- **Events:** `NegotiationCreated`, `OrderCreated`, `OrderPaid`, `OrderCompleted`.
-
-Non-obvious things we learned and handle:
-
-1. **`requirements` must be valid JSON** even for text services — plain text is wrapped as `{"text": …}` (`toJsonRequirements`) and unwrapped provider-side (`extractTask`).
-2. **`payOrder` is only valid at status `created`** (not `creating`) — the poll waits for the on-chain create tx to land before paying.
-3. **Gas is sponsored by an ERC-20 paymaster that draws USDC from each agent's own wallet**, so both the requester and provider need a small USDC balance.
-4. **Payment is retried safely** on transient network errors — the order status is re-read first to avoid double-paying.
-5. **Third-party store agents are unreliable for programmatic A2A hiring** (they reject or never accept SDK negotiations), so Maestro hires in-house worker agents it controls.
-
-## Live discovery
-
-`@maestro/registry` can pull the hireable roster **live from the store's public API** (`/backend/v1/public/agents`) — no auth, no transactions, no keys. `pnpm discover` prints it; `discoverRegistry()` merges it with the in-house roster (in-house serviceIds win, so Scout stays the reliable executor). This is the open, permissionless discovery a normal marketplace can't offer.
-
-## Running it
+Requires Node 18+ and pnpm.
 
 ```bash
 pnpm install
-cp .env.example .env      # fill in CROO + worker keys, LLM key
+cp .env.example .env      # add CROO + worker SDK keys and an LLM key
 pnpm check                # build + typecheck + lint + format + test
-
-pnpm croo:ping            # verify connection + USDC balance
-pnpm discover             # pull hireable agents live from the store (no auth)
-pnpm worker               # terminal 1: run the Scout worker (provider)
-pnpm run:goal -- --llm --live "your goal here"   # terminal 2: orchestrate live
-pnpm run:goal -- --llm --discover "your goal"    # plan across the live store
-pnpm maestro              # (optional) run Maestro as a hireable provider
+pnpm croo:ping            # verify connection + on-chain USDC balance
 ```
 
-Dry-run (no spend) works without `--live`:
+## Using Maestro
+
+**From the CROO website (H2A)** — find Maestro on the store, open its `orchestrate` service, type a goal, and Confirm & Pay. It delivers a composed answer to your order. (Requires `pnpm maestro` + `pnpm worker` running.)
+
+**From code (A2A / local)** — two terminals:
 
 ```bash
-pnpm run:goal -- --llm "your goal"   # mock hires, full order graph, $0
+pnpm worker                                       # 1. run the Scout worker (provider)
+pnpm maestro                                      # 2. run Maestro as a hireable provider
+pnpm run:goal -- --llm --live "your goal here"    #    or drive an orchestration directly
 ```
+
+**Other commands**
+
+```bash
+pnpm discover                                     # pull the hireable roster live from the store
+pnpm run:goal -- --llm "your goal"                # dry-run: full plan + order graph, $0 (mock hires)
+pnpm run:goal -- --llm --discover "your goal"     # plan across the live store
+pnpm croo:hire -- --service <id> --req "<task>"   # hire any one agent directly
+```
+
+## CAP / SDK integration notes
+
+Built on `@croo-network/sdk@0.2.1`. What we learned and handle:
+
+1. **`requirements` must be valid JSON** — plain text is wrapped as `{"text": …}`; schema agents (e.g. `{"address": …}`) get their exact shape, produced by the planner and validated before sending.
+2. **`payOrder` is only valid at status `created`** (not `creating`) — the poll waits for the on-chain create tx to land.
+3. **Gas is sponsored by an ERC-20 paymaster drawing USDC from each agent's own wallet** — both requester and provider need a small balance.
+4. **Safe pay-retry** — transient network errors re-read the order status first, to never double-pay.
+5. **Third-party reliability varies** — some agents reject or never accept SDK hires; Maestro verifies acceptance, formats inputs to schema, and stays resilient (a failed step never aborts the run).
+
+## Live discovery
+
+`@maestro/registry` pulls the hireable roster **live from the store's public API** (`/backend/v1/public/agents`) — no auth, no transactions. `pnpm discover` prints it; `discoverRegistry()` merges it with the in-house roster (in-house serviceIds win). This is the open, permissionless discovery a normal marketplace can't offer.
 
 ## Development
 
-Every capability is its own buildable package (ESM + CJS + types via `tsup`), tested with `vitest`, linted with ESLint + Prettier. The build is gated by `pnpm check`. Progress is tracked phase-by-phase in [`docs/PHASES.md`](docs/PHASES.md), each phase with a runnable proof.
+```bash
+pnpm check          # build + typecheck + lint + format + test (the gate)
+pnpm test           # 44 unit tests (vitest)
+```
+
+Strict TypeScript, ESLint flat config + Prettier, pnpm workspaces. Progress is tracked phase-by-phase in [`docs/PHASES.md`](docs/PHASES.md); submission details in [`docs/SUBMISSION.md`](docs/SUBMISSION.md).
 
 ## License
 
-MIT
+[MIT](LICENSE)

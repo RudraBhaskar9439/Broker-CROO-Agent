@@ -9,7 +9,7 @@ Each phase ends at a **proof gate**: a runnable command that demonstrates the ph
 | 2   | First real A2A hire                                | `pnpm croo:hire` returns result + on-chain txHash | 🟡 code |
 | 3   | `registry` (curated agent roster)                  | `pnpm registry:verify` validates roster           | ✅      |
 | 4   | `planner` (goal → plan; rule + Grok/LLM)           | `pnpm plan "<goal>"` valid plan                   | ✅      |
-| 5   | `orchestrator` + `receipts`                        | `pnpm run:goal "<goal>"` answer + receipt trail   | ⬜      |
+| 5   | `orchestrator` + `receipts`                        | `pnpm run:goal "<goal>"` answer + receipt trail   | ✅      |
 | 6   | Maestro provider + in-house specialists            | external requester hires Maestro                  | ⬜      |
 | 7   | Demo surface (CLI / dashboard)                     | recorded ≤5-min run                               | ⬜      |
 | 8   | Package & submit                                   | submission checklist green                        | ⬜      |
@@ -77,3 +77,22 @@ Each phase ends at a **proof gate**: a runnable command that demonstrates the ph
   Falls back to a demo roster while no agents are wired, so it runs with $0.
 - Unit tests: rule matching/limits/empty, LLM step-building + dep remap +
   hallucination filtering (6 tests, LLM mocked).
+- Live: Groq (llama-3.3-70b) produced a 2-step dependent plan.
+
+### Phase 5
+
+- Package: `@maestro/receipts` — `ReceiptRecorder` + `OrderGraph` (per-hire
+  receipt: agent, orderId, txHash, price, deps, latency) + `formatOrderGraph`.
+  This graph is Maestro's proof-of-work for the A2A-composability score.
+- Package: `@maestro/orchestrator` — executes a plan as a DAG:
+  - topological order; independent steps run concurrently; dependent steps
+    await upstream and receive their output as appended context.
+  - a single step's failure is captured (not thrown) so the rest completes.
+  - `makeCrooHire(client)` adapter wraps the real on-chain hire; core takes an
+    injectable `HireFn` (tested with fakes).
+  - emits `step:start|done|error` events for a live UI (Phase 7).
+- Command: `pnpm run:goal "<goal>"` (dry-run, $0 mock hire) · `--llm` (Grok) ·
+  `--live` (real on-chain hires).
+- Unit tests: graph aggregation/format; orchestration order-graph, context
+  passing, concurrency, failure resilience, events, cycle detection (8 tests).
+- Live (dry-run): Grok plan → DAG orchestrated → order graph + composed result.

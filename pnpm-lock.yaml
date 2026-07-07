@@ -69,6 +69,28 @@ importers:
         specifier: ^9.5.0
         version: 9.14.0
 
+  packages/orchestrator:
+    dependencies:
+      '@maestro/croo-client':
+        specifier: workspace:*
+        version: link:../croo-client
+      '@maestro/planner':
+        specifier: workspace:*
+        version: link:../planner
+      '@maestro/receipts':
+        specifier: workspace:*
+        version: link:../receipts
+    devDependencies:
+      '@maestro/config':
+        specifier: workspace:*
+        version: link:../config
+      '@maestro/logger':
+        specifier: workspace:*
+        version: link:../logger
+      '@maestro/registry':
+        specifier: workspace:*
+        version: link:../registry
+
   packages/planner:
     dependencies:
       '@maestro/registry':
@@ -81,6 +103,8 @@ importers:
       '@maestro/config':
         specifier: workspace:*
         version: link:../config
+
+  packages/receipts: {}
 
   packages/registry:
     dependencies:

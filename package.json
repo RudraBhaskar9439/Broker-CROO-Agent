@@ -23,7 +23,8 @@
     "registry:verify": "tsx packages/registry/scripts/verify.ts",
     "plan": "tsx packages/planner/scripts/plan.ts",
     "run:goal": "tsx packages/orchestrator/scripts/run-goal.ts",
-    "worker": "tsx packages/provider/scripts/worker.ts"
+    "worker": "tsx packages/provider/scripts/worker.ts",
+    "maestro": "tsx packages/orchestrator/scripts/maestro-agent.ts"
   },
   "devDependencies": {
     "@eslint/js": "^9.15.0",

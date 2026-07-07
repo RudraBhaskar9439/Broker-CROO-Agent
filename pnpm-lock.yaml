@@ -87,6 +87,9 @@ importers:
       '@maestro/logger':
         specifier: workspace:*
         version: link:../logger
+      '@maestro/provider':
+        specifier: workspace:*
+        version: link:../provider
       '@maestro/registry':
         specifier: workspace:*
         version: link:../registry

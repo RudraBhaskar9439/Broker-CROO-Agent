@@ -28,6 +28,7 @@
   "devDependencies": {
     "@maestro/config": "workspace:*",
     "@maestro/logger": "workspace:*",
+    "@maestro/provider": "workspace:*",
     "@maestro/registry": "workspace:*"
   }
 }

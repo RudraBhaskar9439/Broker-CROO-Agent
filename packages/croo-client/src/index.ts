@@ -7,6 +7,9 @@ export type { CreateClientDeps, ProbeResult } from './client';
 export { waitForEvent, forOrder, forNegotiation } from './events';
 export type { EventSource, WaitForEventOptions } from './events';
 
+export { hire, HireError } from './hire';
+export type { HireRequest, HireOptions, HireResult } from './hire';
+
 export { getErc20Balance, getUsdcBalance } from './balance';
 export type { TokenBalance } from './balance';
 

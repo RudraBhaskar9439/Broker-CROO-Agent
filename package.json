@@ -18,7 +18,8 @@
     "format": "prettier --check .",
     "format:fix": "prettier --write .",
     "check": "pnpm build && pnpm typecheck && pnpm lint && pnpm format && pnpm test",
-    "croo:ping": "tsx packages/croo-client/scripts/ping.ts"
+    "croo:ping": "tsx packages/croo-client/scripts/ping.ts",
+    "croo:hire": "tsx packages/croo-client/scripts/hire.ts"
   },
   "devDependencies": {
     "@eslint/js": "^9.15.0",

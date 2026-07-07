@@ -2,17 +2,17 @@
 
 Each phase ends at a **proof gate**: a runnable command that demonstrates the phase works.
 
-| #   | Phase                                              | Proof gate                                      | Status |
-| --- | -------------------------------------------------- | ----------------------------------------------- | ------ |
-| 0   | Foundation (monorepo, tooling, `config`, `logger`) | `pnpm check` all green                          | ✅     |
-| 1   | `croo-client` (typed SDK wrapper, WS, events)      | `pnpm croo:ping` prints wallet + USDC balance   | ✅     |
-| 2   | First real A2A hire                                | `pnpm hire` returns result + on-chain txHash    | ⬜     |
-| 3   | `registry` (curated agent roster)                  | `pnpm registry:verify` all live                 | ⬜     |
-| 4   | `planner` (Claude goal → plan)                     | `pnpm plan "<goal>"` valid plan                 | ⬜     |
-| 5   | `orchestrator` + `receipts`                        | `pnpm run:goal "<goal>"` answer + receipt trail | ⬜     |
-| 6   | Maestro provider + in-house specialists            | external requester hires Maestro                | ⬜     |
-| 7   | Demo surface (CLI / dashboard)                     | recorded ≤5-min run                             | ⬜     |
-| 8   | Package & submit                                   | submission checklist green                      | ⬜     |
+| #   | Phase                                              | Proof gate                                        | Status  |
+| --- | -------------------------------------------------- | ------------------------------------------------- | ------- |
+| 0   | Foundation (monorepo, tooling, `config`, `logger`) | `pnpm check` all green                            | ✅      |
+| 1   | `croo-client` (typed SDK wrapper, WS, events)      | `pnpm croo:ping` prints wallet + USDC balance     | ✅      |
+| 2   | First real A2A hire                                | `pnpm croo:hire` returns result + on-chain txHash | 🟡 code |
+| 3   | `registry` (curated agent roster)                  | `pnpm registry:verify` all live                   | ⬜      |
+| 4   | `planner` (Claude goal → plan)                     | `pnpm plan "<goal>"` valid plan                   | ⬜      |
+| 5   | `orchestrator` + `receipts`                        | `pnpm run:goal "<goal>"` answer + receipt trail   | ⬜      |
+| 6   | Maestro provider + in-house specialists            | external requester hires Maestro                  | ⬜      |
+| 7   | Demo surface (CLI / dashboard)                     | recorded ≤5-min run                               | ⬜      |
+| 8   | Package & submit                                   | submission checklist green                        | ⬜      |
 
 ## Proof log
 
@@ -34,3 +34,16 @@ Each phase ends at a **proof gate**: a runnable command that demonstrates the ph
   missing. With a funded `.env`: authenticates the SDK key, connects the
   WebSocket, and prints the wallet's USDC balance.
 - Unit tests: `waitForEvent` resolve / predicate-filter / timeout paths.
+
+### Phase 2
+
+- Adds `hire(client, { serviceId, requirements })` to `@maestro/croo-client`:
+  negotiate → order created → pay (USDC escrow) → delivery, returning
+  `{ orderId, payTxHash, price, text, json, contentHash, elapsedMs }`.
+- Reliability is poll-based (REST status), so a dropped WebSocket event never
+  strands a hire; terminal guards for negotiation/order rejection & expiry.
+- Command: `pnpm croo:hire -- --service <serviceId> --req "<task>"`
+  (service defaults to `CROO_TARGET_SERVICE_ID`).
+- Unit tests: full lifecycle, multi-poll wait, rejection, timeout (fake client).
+- 🟡 Code + tests green. Live proof (real on-chain tx) pending a funded wallet
+  and a target `serviceId`.

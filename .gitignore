@@ -16,3 +16,13 @@ coverage/
 
 # local harness / tooling
 .claude/
+
+# video / audio assets (kept local, not pushed)
+Video/
+video/
+videos/
+*.mp4
+*.mov
+*.m4a
+*.wav
+*.mp3
